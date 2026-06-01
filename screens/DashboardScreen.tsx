@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { startupHealth } from '../data/dashboard';
 import type { RootStackParamList } from '../navigation/types';
 import { useDashboardStore } from '../store/useDashboardStore';
+import { useNotificationStore } from '../store/useNotificationStore';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import StartupHealthCard from '../components/StartupHealthCard';
@@ -22,6 +23,7 @@ export default function DashboardScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { tasks, toggleTask } = useDashboardStore();
   const { aiSuggestions, upcomingEvent } = startupHealth;
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   const completedCount = tasks.filter((t) => t.completed).length;
   const totalCount = tasks.length;
@@ -36,7 +38,18 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Welcome header */}
-        <Text style={styles.welcomeText}>Welcome, Founder 👋</Text>
+        <View style={styles.welcomeRow}>
+          <Text style={styles.welcomeText}>Welcome, Founder 👋</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Notifications')}
+          >
+            <View style={styles.bellWrapper}>
+              <Ionicons name="notifications-outline" size={24} color="#FFFFFF" />
+              {unreadCount > 0 && <View style={styles.bellBadge} />}
+            </View>
+          </TouchableOpacity>
+        </View>
 
         {/* Startup Health Card */}
         <TouchableOpacity
@@ -142,10 +155,27 @@ const styles = StyleSheet.create({
   },
 
   // Header
+  welcomeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
   welcomeText: {
     ...typography.heading,
     color: colors.text,
-    marginBottom: 24,
+  },
+  bellWrapper: {
+    position: 'relative',
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF3B5C',
   },
 
   // Cards

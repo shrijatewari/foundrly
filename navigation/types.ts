@@ -20,6 +20,7 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
   Showcase: undefined;
   StartupHealth: undefined;
+  Notifications: undefined;
 };
 
 declare global {

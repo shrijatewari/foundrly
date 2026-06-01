@@ -7,6 +7,7 @@ import LoginScreen from '../screens/LoginScreen';
 import MainTabNavigator from './MainTabNavigator';
 import ProgressShowcaseScreen from '../screens/ProgressShowcaseScreen';
 import StartupHealthScreen from '../screens/StartupHealthScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,6 +35,7 @@ export default function RootNavigator() {
         }}
       />
       <Stack.Screen name="StartupHealth" component={StartupHealthScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 }
