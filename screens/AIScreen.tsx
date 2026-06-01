@@ -14,22 +14,53 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAIStore } from '../store/useAIStore';
 import { AIMessage } from '../types';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
 
-const INPUT_BG = '#1C1C24';
-const BORDER = 'rgba(255,255,255,0.10)';
-const PLACEHOLDER = 'rgba(255,255,255,0.30)';
-const ICON_COLOR = 'rgba(255,255,255,0.35)';
+// ── Design tokens (spec-exact) ───────────────────────────────────────────────
+const BG = '#0B0B0F';
+const SURFACE = '#171717';
+const ACCENT = '#FF3B5C';
+const BORDER_COLOR = '#262626';
+const BORDER_SUBTLE = '#3F3F3F';
+const TEXT_PRIMARY = '#FFFFFF';
+const TEXT_MUTED = '#A1A1A1';
+const TEXT_DIM = '#525252';
 
-const CHIPS = [
-  'Validate my idea',
-  'Find co-founders',
-  'Pitch tips',
-  'Raise funding',
-  'Build faster',
+// ── Chip definitions ─────────────────────────────────────────────────────────
+const CHIPS: { icon: React.ComponentProps<typeof Ionicons>['name']; label: string }[] = [
+  { icon: 'image-outline', label: 'Clone a Screenshot' },
+  { icon: 'git-branch-outline', label: 'Find co-founders' },
+  { icon: 'cloud-upload-outline', label: 'Pitch tips' },
+  { icon: 'desktop-outline', label: 'Raise funding' },
+  { icon: 'person-circle-outline', label: 'Build faster' },
 ];
 
+// ── Send button (defined outside to prevent remount) ─────────────────────────
+function SendButton({
+  hasText,
+  onPress,
+}: {
+  hasText: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity onPress={onPress} disabled={!hasText} activeOpacity={0.75}>
+      <View
+        style={[
+          styles.sendBtn,
+          { backgroundColor: hasText ? TEXT_PRIMARY : 'transparent' },
+        ]}
+      >
+        <Ionicons
+          name="arrow-up-outline"
+          size={16}
+          color={hasText ? '#000000' : TEXT_MUTED}
+        />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// ── Screen ────────────────────────────────────────────────────────────────────
 export default function AIScreen() {
   const { messages, isTyping, sendMessage } = useAIStore();
   const [input, setInput] = useState('');
@@ -51,29 +82,7 @@ export default function AIScreen() {
     sendMessage(trimmed);
   };
 
-  // ─── Shared sub-components ────────────────────────────────────────────────
-
-  const SendButton = ({ compact }: { compact?: boolean }) => (
-    <TouchableOpacity
-      onPress={handleSend}
-      disabled={!hasText}
-      activeOpacity={0.75}
-      style={[
-        styles.sendBtn,
-        compact && styles.sendBtnCompact,
-        hasText ? styles.sendBtnActive : styles.sendBtnIdle,
-      ]}
-    >
-      <Ionicons
-        name="arrow-up"
-        size={compact ? 16 : 18}
-        color={hasText ? '#000000' : ICON_COLOR}
-      />
-    </TouchableOpacity>
-  );
-
-  // ─── Render: Initial state ────────────────────────────────────────────────
-
+  // ── Initial state ──────────────────────────────────────────────────────────
   if (!inChatMode) {
     return (
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -81,43 +90,61 @@ export default function AIScreen() {
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.initialWrapper}>
-            <Text style={styles.heading}>What can I help{'\n'}you build?</Text>
+          <View style={styles.initialCenter}>
+            {/* Heading */}
+            <Text style={styles.heading}>What can I help you build?</Text>
 
-            {/* Main input card */}
-            <View style={styles.inputCard}>
+            {/* Input container */}
+            <View style={styles.inputContainer}>
               <TextInput
-                style={styles.inputCardText}
+                style={styles.inputField}
                 value={input}
                 onChangeText={setInput}
                 placeholder="Ask your AI co-founder..."
-                placeholderTextColor={PLACEHOLDER}
+                placeholderTextColor={TEXT_DIM}
                 multiline
                 maxLength={500}
+                textAlignVertical="top"
+                returnKeyType="default"
               />
-              <View style={styles.inputCardRow}>
-                <TouchableOpacity activeOpacity={0.6}>
-                  <Ionicons name="attach-outline" size={22} color={ICON_COLOR} />
+
+              {/* Bottom row: attach | [project btn] [send btn] */}
+              <View style={styles.inputBottomRow}>
+                {/* Left — attach */}
+                <TouchableOpacity style={styles.attachBtn} activeOpacity={0.7}>
+                  <Ionicons name="attach-outline" size={16} color={TEXT_PRIMARY} />
                 </TouchableOpacity>
-                <SendButton />
+
+                {/* Right — project + send */}
+                <View style={styles.inputRightBtns}>
+                  <TouchableOpacity activeOpacity={0.7}>
+                    <View style={styles.projectBtn}>
+                      <Ionicons name="add-outline" size={16} color={TEXT_MUTED} />
+                      <Text style={styles.projectBtnText}>Project</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <SendButton hasText={hasText} onPress={handleSend} />
+                </View>
               </View>
             </View>
 
-            {/* Suggestion chips */}
+            {/* Chips */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsContent}
               style={styles.chipsScroll}
+              contentContainerStyle={styles.chipsContent}
             >
               {CHIPS.map((chip) => (
                 <TouchableOpacity
-                  key={chip}
+                  key={chip.label}
                   style={styles.chip}
-                  onPress={() => setInput(chip)}
+                  onPress={() => setInput(chip.label)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.chipText}>{chip}</Text>
+                  <Ionicons name={chip.icon} size={14} color={TEXT_MUTED} />
+                  <Text style={styles.chipText}>{chip.label}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -127,26 +154,23 @@ export default function AIScreen() {
     );
   }
 
-  // ─── Render: Chat state ───────────────────────────────────────────────────
-
+  // ── Chat state ─────────────────────────────────────────────────────────────
   const renderMessage = ({ item }: { item: AIMessage }) => {
     const isUser = item.role === 'user';
 
     if (isUser) {
       return (
-        <View style={styles.rowUser}>
-          <View style={styles.bubbleUser}>
-            <Text style={styles.bubbleTextUser}>{item.content}</Text>
-          </View>
+        <View style={styles.bubbleUser}>
+          <Text style={styles.bubbleText}>{item.content}</Text>
         </View>
       );
     }
 
     return (
-      <View style={styles.rowAI}>
+      <View style={styles.bubbleAIWrapper}>
         <Text style={styles.aiLabel}>AI ✦</Text>
         <View style={styles.bubbleAI}>
-          <Text style={styles.bubbleTextAI}>{item.content}</Text>
+          <Text style={styles.bubbleText}>{item.content}</Text>
         </View>
       </View>
     );
@@ -169,7 +193,7 @@ export default function AIScreen() {
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
             isTyping ? (
-              <View style={styles.rowAI}>
+              <View style={styles.bubbleAIWrapper}>
                 <Text style={styles.aiLabel}>AI ✦</Text>
                 <View style={styles.bubbleAI}>
                   <View style={styles.typingRow}>
@@ -183,19 +207,20 @@ export default function AIScreen() {
           }
         />
 
-        {/* Compact bottom input bar */}
+        {/* Bottom input bar */}
         <View style={styles.chatInputArea}>
           <View style={styles.chatInputBar}>
             <TextInput
-              style={styles.chatInputText}
+              style={styles.chatInputField}
               value={input}
               onChangeText={setInput}
               placeholder="Ask your AI co-founder..."
-              placeholderTextColor={PLACEHOLDER}
+              placeholderTextColor={TEXT_DIM}
               multiline
               maxLength={500}
+              returnKeyType="default"
             />
-            <SendButton compact />
+            <SendButton hasText={hasText} onPress={handleSend} />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -203,150 +228,149 @@ export default function AIScreen() {
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: BG,
   },
   flex: {
     flex: 1,
   },
 
-  // ── Initial state ──────────────────────────────────────────────────────────
-  initialWrapper: {
+  // ── Initial state ────────────────────────────────────────────────────────────
+  initialCenter: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   heading: {
     fontSize: 32,
     fontWeight: '700',
-    color: colors.text,
-    lineHeight: 40,
-    marginBottom: 24,
+    color: TEXT_PRIMARY,
+    textAlign: 'center',
+    marginBottom: 32,
   },
 
-  // Input card
-  inputCard: {
-    backgroundColor: INPUT_BG,
-    borderRadius: 16,
+  // Input container
+  inputContainer: {
+    width: '100%',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: BORDER,
-    padding: 16,
+    borderColor: BORDER_COLOR,
+    padding: 12,
   },
-  inputCardText: {
-    ...typography.body,
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 22,
+  inputField: {
+    color: TEXT_PRIMARY,
+    backgroundColor: 'transparent',
+    fontSize: 14,
+    lineHeight: 20,
     minHeight: 60,
     maxHeight: 200,
-    backgroundColor: 'transparent',
     textAlignVertical: 'top',
     padding: 0,
   },
-  inputCardRow: {
+  inputBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: 8,
+  },
+  attachBtn: {
+    padding: 8,
+  },
+  inputRightBtns: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  projectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: BORDER_SUBTLE,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  projectBtnText: {
+    fontSize: 12,
+    color: TEXT_MUTED,
   },
 
-  // Send button (shared)
+  // Send button (shared between both states)
   sendBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendBtnCompact: {
-    width: 32,
-    height: 32,
     borderRadius: 8,
-  },
-  sendBtnIdle: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  sendBtnActive: {
-    backgroundColor: colors.text,
+    borderWidth: 1,
+    borderColor: BORDER_SUBTLE,
+    padding: 6,
   },
 
   // Chips
   chipsScroll: {
     marginTop: 16,
+    alignSelf: 'stretch',
   },
   chipsContent: {
-    gap: 8,
     paddingRight: 4,
   },
   chip: {
-    backgroundColor: INPUT_BG,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 999,
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: SURFACE,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: BORDER_COLOR,
+    marginRight: 8,
+    height: 36,
   },
   chipText: {
-    ...typography.caption,
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 12,
+    color: TEXT_MUTED,
   },
 
-  // ── Chat state ─────────────────────────────────────────────────────────────
+  // ── Chat state ────────────────────────────────────────────────────────────────
   listContent: {
     paddingHorizontal: 16,
     paddingTop: 20,
-    paddingBottom: 12,
-  },
-
-  rowUser: {
-    alignItems: 'flex-end',
-    marginBottom: 12,
-  },
-  rowAI: {
-    alignItems: 'flex-start',
-    marginBottom: 12,
+    paddingBottom: 8,
   },
 
   bubbleUser: {
-    backgroundColor: colors.accent,
+    alignSelf: 'flex-end',
+    backgroundColor: ACCENT,
     borderRadius: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 12,
+    marginBottom: 8,
     maxWidth: '80%',
   },
-  bubbleTextUser: {
-    ...typography.body,
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 21,
+  bubbleAIWrapper: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    maxWidth: '80%',
   },
-
   aiLabel: {
-    ...typography.caption,
-    color: 'rgba(255,255,255,0.35)',
+    color: TEXT_DIM,
     fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.6,
     marginBottom: 4,
     marginLeft: 2,
   },
   bubbleAI: {
-    backgroundColor: INPUT_BG,
+    backgroundColor: SURFACE,
     borderRadius: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    maxWidth: '80%',
+    padding: 12,
   },
-  bubbleTextAI: {
-    ...typography.body,
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 21,
+  bubbleText: {
+    fontSize: 14,
+    color: TEXT_PRIMARY,
+    lineHeight: 20,
   },
 
   // Typing dots
@@ -359,36 +383,34 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: 'rgba(255,255,255,0.55)',
+    backgroundColor: TEXT_MUTED,
   },
 
-  // Compact chat input bar
+  // Chat bottom bar
   chatInputArea: {
-    paddingHorizontal: 14,
-    paddingTop: 8,
-    paddingBottom: 110,
-    backgroundColor: colors.background,
+    paddingBottom: 94,
+    backgroundColor: BG,
   },
   chatInputBar: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: INPUT_BG,
+    alignItems: 'center',
+    backgroundColor: SURFACE,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: BORDER_COLOR,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    paddingLeft: 18,
-    paddingRight: 8,
-    gap: 8,
+    margin: 16,
   },
-  chatInputText: {
+  chatInputField: {
     flex: 1,
-    ...typography.body,
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 21,
+    color: TEXT_PRIMARY,
+    fontSize: 14,
+    lineHeight: 20,
     maxHeight: 120,
     backgroundColor: 'transparent',
-    paddingTop: 4,
-    paddingBottom: 4,
     padding: 0,
+    paddingRight: 8,
+    textAlignVertical: 'top',
   },
 });

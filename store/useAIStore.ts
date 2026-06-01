@@ -5,12 +5,12 @@ import { AIMessage } from '../types';
 const STORAGE_KEY = '@foundrly/ai-messages';
 
 const AI_RESPONSES = [
-  'Talk to 20 potential users and identify recurring pain points.',
-  'Focus on one core problem before building any features.',
-  'Your pitch deck needs a clear problem slide above everything else.',
-  'Validate with a landing page before writing a single line of code.',
-  'The best co-founder is someone who fills your exact skill gaps.',
-  'Revenue is the best fundraising strategy for early stage startups.',
+  'Talk to 20 potential users first.',
+  'Focus on one problem before building.',
+  'Validate with a landing page first.',
+  'The best co-founder fills your skill gaps.',
+  'Revenue is the best fundraising strategy.',
+  'Your pitch needs a clear problem slide.',
 ];
 
 let responseIndex = 0;
