@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import {
   ScrollView,
   StyleSheet,
@@ -40,12 +41,22 @@ export default function DashboardScreen() {
         />
 
         {/* AI Suggestions Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>AI SUGGESTIONS</Text>
+        <View style={styles.suggestionsCard}>
+          <Text style={styles.suggestionsLabel}>AI Suggestions</Text>
           {aiSuggestions.map((suggestion, index) => (
-            <View key={index} style={styles.suggestionRow}>
-              <Text style={styles.lightningIcon}>⚡</Text>
-              <Text style={styles.suggestionText}>{suggestion}</Text>
+            <View
+              key={index}
+              style={[
+                styles.suggestionRow,
+                index === aiSuggestions.length - 1 && styles.suggestionRowLast,
+              ]}
+            >
+              <View style={styles.suggestionIcon}>
+                <Ionicons name="flash" size={14} color="#FF3B5C" />
+              </View>
+              <View style={styles.suggestionBody}>
+                <Text style={styles.suggestionText}>{suggestion}</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -142,23 +153,55 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // AI Suggestions
+  // AI Suggestions — glow card
+  suggestionsCard: {
+    backgroundColor: '#0F0A0B',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,59,92,0.25)',
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#FF3B5C',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  suggestionsLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FF3B5C',
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
   suggestionRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  lightningIcon: {
-    fontSize: 14,
-    marginRight: 8,
-    marginTop: 2,
+  suggestionRowLast: {
+    marginBottom: 0,
+    paddingBottom: 0,
+    borderBottomWidth: 0,
+  },
+  suggestionIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,59,92,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  suggestionBody: {
+    flex: 1,
+    marginLeft: 10,
   },
   suggestionText: {
-    ...typography.body,
-    color: colors.text,
-    opacity: 0.85,
-    flex: 1,
-    fontSize: 14,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
     lineHeight: 20,
   },
 
