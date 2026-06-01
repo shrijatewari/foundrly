@@ -1,8 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import type { MainTabParamList } from './types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
+import FoundrlyDock from '../components/FoundrlyDock';
 import DashboardScreen from '../screens/DashboardScreen';
 import CommunityScreen from '../screens/CommunityScreen';
 import AIScreen from '../screens/AIScreen';
@@ -10,39 +13,40 @@ import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-type IoniconName = keyof typeof Ionicons.glyphMap;
+// Adapts React Navigation's tab bar contract to the FoundrlyDock's
+// { activeTab, onTabChange } API. Route names map to dock ids by lowercasing.
+function FoundrlyTabBar({ state, navigation }: BottomTabBarProps) {
+  const activeRoute = state.routes[state.index];
+  const activeTab = activeRoute.name.toLowerCase();
 
-const TAB_ICONS: Record<keyof MainTabParamList, { focused: IoniconName; unfocused: IoniconName }> = {
-  Dashboard: { focused: 'grid', unfocused: 'grid-outline' },
-  Community: { focused: 'people', unfocused: 'people-outline' },
-  AI: { focused: 'sparkles', unfocused: 'sparkles-outline' },
-  Profile: { focused: 'person', unfocused: 'person-outline' },
-};
+  const handleTabChange = (tabId: string) => {
+    const route = state.routes.find((r) => r.name.toLowerCase() === tabId);
+    if (!route) return;
+
+    const isFocused = route.key === activeRoute.key;
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: route.key,
+      canPreventDefault: true,
+    });
+
+    if (!isFocused && !event.defaultPrevented) {
+      navigation.navigate(route.name as never);
+    }
+  };
+
+  return <FoundrlyDock activeTab={activeTab} onTabChange={handleTabChange} />;
+}
 
 export default function MainTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={(props) => <FoundrlyTabBar {...props} />}
+      screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerTitleStyle: { ...typography.subheading, color: colors.text },
         headerTintColor: colors.text,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.5)',
-        tabBarStyle: {
-          backgroundColor: colors.secondary,
-          borderTopColor: 'rgba(255,255,255,0.06)',
-        },
-        tabBarIcon: ({ focused, color, size }) => {
-          const icon = TAB_ICONS[route.name];
-          return (
-            <Ionicons
-              name={focused ? icon.focused : icon.unfocused}
-              size={size}
-              color={color}
-            />
-          );
-        },
-      })}
+      }}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Community" component={CommunityScreen} />

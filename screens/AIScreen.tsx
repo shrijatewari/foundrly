@@ -207,6 +207,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    // Clear the floating FoundrlyDock (bottom: 24, ~86 tall).
+    marginBottom: 100,
     borderTopWidth: 1,
     borderTopColor: colors.secondary,
     backgroundColor: colors.background,

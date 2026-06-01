@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: 112,
   },
   header: {
     alignItems: 'center',
