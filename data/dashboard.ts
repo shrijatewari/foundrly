@@ -7,7 +7,7 @@ export const startupHealth: StartupHealth = {
   aiSuggestions: [
     'Your burn rate is projected to exceed runway in 4 months — consider delaying two planned hires until MRR crosses $15K.',
     'Three of your top five competitors recently added B2B enterprise tiers. Evaluate whether a pilot enterprise plan fits your current sales motion.',
-    'You haven't posted founder content in 12 days. Consistent LinkedIn activity correlates with 2–3× faster warm inbound for early-stage founders.',
+    'You haven\'t posted founder content in 12 days. Consistent LinkedIn activity correlates with 2–3× faster warm inbound for early-stage founders.',
   ],
   dailyTasks: [
     { id: 'task-1', title: 'Follow up with Series A lead from YC intro', completed: true },
