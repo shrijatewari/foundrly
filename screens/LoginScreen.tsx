@@ -297,8 +297,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 16,
-    paddingVertical: 28,
-    paddingHorizontal: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 28,
     shadowColor: colors.primary,
     shadowOpacity: 0.2,
     shadowRadius: 40,
@@ -309,6 +309,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textMuted,
     letterSpacing: 1.5,
+    textTransform: 'uppercase',
     marginBottom: 8,
   } as TextStyle,
   inputWrap: {
