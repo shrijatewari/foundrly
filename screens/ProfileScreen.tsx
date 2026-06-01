@@ -1,20 +1,17 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
-
-const PROFILE = {
-  name: 'Alex Rivera',
-  role: 'Full Stack Founder',
-  school: 'IIT Delhi — Class of 2026',
-  skills: ['React Native', 'UI/UX', 'Growth', 'Pitching'],
-  achievements: [
-    'Winner — National Startup Pitch 2025',
-    'Top 1% on Foundrly Builder Leaderboard',
-    'Raised pre-seed round of $250K',
-  ],
-};
 
 const STATS = [
   { value: '2',   label: 'Startups' },
@@ -27,6 +24,12 @@ const MY_STARTUPS = [
   { name: 'GreenAI', stage: 'Idea Stage'      },
 ];
 
+const ACHIEVEMENTS = [
+  'Winner — National Startup Pitch 2025',
+  'Top 1% on Foundrly Builder Leaderboard',
+  'Raised pre-seed round of $250K',
+];
+
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
@@ -34,86 +37,171 @@ function getInitials(name: string): string {
 }
 
 export default function ProfileScreen() {
+  const [profileName,   setProfileName]   = useState('Alex Rivera');
+  const [profileRole,   setProfileRole]   = useState('Full Stack Founder');
+  const [profileSchool, setProfileSchool] = useState('IIT Delhi — Class of 2026');
+  const [skills,        setSkills]        = useState(['React Native', 'UI/UX', 'Growth', 'Pitching']);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName,   setEditName]   = useState(profileName);
+  const [editRole,   setEditRole]   = useState(profileRole);
+  const [editSchool, setEditSchool] = useState(profileSchool);
+  const [editSkills, setEditSkills] = useState(skills.join(', '));
+
+  const openEdit = () => {
+    setEditName(profileName);
+    setEditRole(profileRole);
+    setEditSchool(profileSchool);
+    setEditSkills(skills.join(', '));
+    setIsEditModalOpen(true);
+  };
+
+  const handleSave = () => {
+    setProfileName(editName);
+    setProfileRole(editRole);
+    setProfileSchool(editSchool);
+    setSkills(editSkills.split(',').map((s) => s.trim()).filter(Boolean));
+    setIsEditModalOpen(false);
+  };
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <LinearGradient
-        colors={[colors.primary, colors.background]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.header}
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Edit button */}
-        <TouchableOpacity
-          style={styles.editBtn}
-          activeOpacity={0.7}
-          onPress={() => Alert.alert('Edit profile coming soon!')}
+        <LinearGradient
+          colors={[colors.primary, colors.background]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.header}
         >
-          <View style={styles.editBtnInner}>
-            <Text style={styles.editBtnText}>Edit</Text>
+          {/* Edit button */}
+          <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={openEdit}>
+            <View style={styles.editBtnInner}>
+              <Text style={styles.editBtnText}>Edit</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{getInitials(profileName)}</Text>
           </View>
-        </TouchableOpacity>
+          <Text style={styles.name}>{profileName}</Text>
+          <Text style={styles.role}>{profileRole}</Text>
+          <Text style={styles.school}>{profileSchool}</Text>
 
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{getInitials(PROFILE.name)}</Text>
+          {/* Stats row */}
+          <View style={styles.statsRow}>
+            {STATS.map((stat) => (
+              <View key={stat.label} style={styles.statItem}>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
+        </LinearGradient>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Skills</Text>
+          <View style={styles.chipRow}>
+            {skills.map((skill) => (
+              <View key={skill} style={styles.chip}>
+                <Text style={styles.chipText}>{skill}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-        <Text style={styles.name}>{PROFILE.name}</Text>
-        <Text style={styles.role}>{PROFILE.role}</Text>
-        <Text style={styles.school}>{PROFILE.school}</Text>
 
-        {/* Stats row */}
-        <View style={styles.statsRow}>
-          {STATS.map((stat) => (
-            <View key={stat.label} style={styles.statItem}>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Achievements</Text>
+          {ACHIEVEMENTS.map((achievement) => (
+            <View key={achievement} style={styles.achievementRow}>
+              <View style={styles.trophyCircle}>
+                <Ionicons name="trophy" size={16} color={colors.accent} />
+              </View>
+              <Text style={styles.achievementText}>{achievement}</Text>
             </View>
           ))}
         </View>
-      </LinearGradient>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Skills</Text>
-        <View style={styles.chipRow}>
-          {PROFILE.skills.map((skill) => (
-            <View key={skill} style={styles.chip}>
-              <Text style={styles.chipText}>{skill}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Startups</Text>
+          {MY_STARTUPS.map((startup) => (
+            <View key={startup.name} style={styles.startupCard}>
+              <View style={styles.startupIcon}>
+                <Ionicons name="rocket-outline" size={20} color="#FF3B5C" />
+              </View>
+              <View style={styles.startupInfo}>
+                <Text style={styles.startupName}>{startup.name}</Text>
+                <Text style={styles.startupStage}>{startup.stage}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#333333" />
             </View>
           ))}
         </View>
-      </View>
+      </ScrollView>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Achievements</Text>
-        {PROFILE.achievements.map((achievement) => (
-          <View key={achievement} style={styles.achievementRow}>
-            <View style={styles.trophyCircle}>
-              <Ionicons name="trophy" size={16} color={colors.accent} />
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={isEditModalOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setIsEditModalOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            {/* Modal header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setIsEditModalOpen(false)} activeOpacity={0.7}>
+                <Ionicons name="close" size={22} color="#666666" />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.achievementText}>{achievement}</Text>
-          </View>
-        ))}
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>My Startups</Text>
-        {MY_STARTUPS.map((startup) => (
-          <View key={startup.name} style={styles.startupCard}>
-            <View style={styles.startupIcon}>
-              <Ionicons name="rocket-outline" size={20} color="#FF3B5C" />
-            </View>
-            <View style={styles.startupInfo}>
-              <Text style={styles.startupName}>{startup.name}</Text>
-              <Text style={styles.startupStage}>{startup.stage}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#333333" />
+            <Text style={styles.fieldLabel}>Full Name</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={editName}
+              onChangeText={setEditName}
+              placeholderTextColor="#444444"
+            />
+
+            <Text style={styles.fieldLabel}>Role</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={editRole}
+              onChangeText={setEditRole}
+              placeholderTextColor="#444444"
+            />
+
+            <Text style={styles.fieldLabel}>School</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={editSchool}
+              onChangeText={setEditSchool}
+              placeholderTextColor="#444444"
+            />
+
+            <Text style={styles.fieldLabel}>Skills</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={editSkills}
+              onChangeText={setEditSkills}
+              placeholder="Comma separated"
+              placeholderTextColor="#444444"
+            />
+
+            {/* Save button */}
+            <TouchableOpacity onPress={handleSave} activeOpacity={0.8}>
+              <View style={styles.saveBtn}>
+                <Text style={styles.saveBtnText}>Save Changes</Text>
+              </View>
+            </TouchableOpacity>
           </View>
-        ))}
-      </View>
-    </ScrollView>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -279,5 +367,58 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666666',
     marginTop: 2,
+  },
+
+  // ── Edit Modal ───────────────────────────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#111114',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 36,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  fieldLabel: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 6,
+  },
+  fieldInput: {
+    backgroundColor: '#1C1C24',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#FFFFFF',
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    marginBottom: 16,
+  },
+  saveBtn: {
+    backgroundColor: '#FF3B5C',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  saveBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
