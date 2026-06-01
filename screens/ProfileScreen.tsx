@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NavigationProp } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
@@ -13,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
@@ -41,10 +39,7 @@ function getInitials(name: string): string {
 }
 
 export default function ProfileScreen() {
-  // ProfileScreen lives inside MainTabNavigator (the 'Main' route).
-  // useNavigation() here returns the tab navigator's nav prop, not the root
-  // stack's. getParent() climbs up to the root stack so reset targets 'Login'.
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation();
 
   const handleLogout = () => {
     Alert.alert(
@@ -56,10 +51,12 @@ export default function ProfileScreen() {
           text: 'Log Out',
           style: 'destructive',
           onPress: () => {
-            navigation.getParent<NavigationProp<RootStackParamList>>()?.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              })
+            );
           },
         },
       ],
