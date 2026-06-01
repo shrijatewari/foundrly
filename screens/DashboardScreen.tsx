@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ScrollView,
   StyleSheet,
@@ -8,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { startupHealth } from '../data/dashboard';
+import type { RootStackParamList } from '../navigation/types';
 import { useDashboardStore } from '../store/useDashboardStore';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -15,6 +18,8 @@ import StartupHealthCard from '../components/StartupHealthCard';
 import ProgressBar from '../components/ProgressBar';
 
 export default function DashboardScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { tasks, toggleTask } = useDashboardStore();
   const { aiSuggestions, upcomingEvent } = startupHealth;
 
@@ -34,11 +39,16 @@ export default function DashboardScreen() {
         <Text style={styles.welcomeText}>Welcome, Founder 👋</Text>
 
         {/* Startup Health Card */}
-        <StartupHealthCard
-          startupName="EcoTech"
-          stage="MVP Development"
-          progress={72}
-        />
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('StartupHealth')}
+        >
+          <StartupHealthCard
+            startupName="EcoTech"
+            stage="MVP Development"
+            progress={72}
+          />
+        </TouchableOpacity>
 
         {/* AI Suggestions Card */}
         <View style={styles.suggestionsCard}>

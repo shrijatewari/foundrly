@@ -84,13 +84,13 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>More</Text>
         <Pressable
           style={({ pressed }) => [styles.linkRow, pressed && styles.linkRowPressed]}
-          onPress={() => navigation.navigate('Showcase')}
+          onPress={() => navigation.navigate('StartupHealth')}
         >
           <View style={styles.linkLeft}>
             <View style={styles.linkIcon}>
               <Ionicons name="stats-chart" size={16} color={colors.accent} />
             </View>
-            <Text style={styles.linkText}>UI Components</Text>
+            <Text style={styles.linkText}>View Startup Health</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </Pressable>

@@ -6,6 +6,7 @@ import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MainTabNavigator from './MainTabNavigator';
 import ProgressShowcaseScreen from '../screens/ProgressShowcaseScreen';
+import StartupHealthScreen from '../screens/StartupHealthScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -32,6 +33,7 @@ export default function RootNavigator() {
           headerTitleStyle: { ...typography.subheading, color: colors.text },
         }}
       />
+      <Stack.Screen name="StartupHealth" component={StartupHealthScreen} />
     </Stack.Navigator>
   );
 }
