@@ -26,7 +26,7 @@ export const posts: Post[] = [
     founderName: 'Priya Nair',
     startupName: 'GreenLedger',
     content:
-      'We hit 1,000 paying customers today. Took us 14 months and two complete pivots to get here. The original idea is barely recognizable, and that's okay. Startups are experiments.',
+      'We hit 1,000 paying customers today. Took us 14 months and two complete pivots to get here. The original idea is barely recognizable, and that\'s okay. Startups are experiments.',
     likes: 341,
     comments: 74,
     timeAgo: '9h ago',
@@ -46,9 +46,11 @@ export const posts: Post[] = [
     founderName: 'Aiden Park',
     startupName: 'Routeify',
     content:
-      'Reminder that "doing things that don't scale" still works in 2026. Our first 100 customers were onboarded manually by me via video call. It's slow, exhausting, and gave us insights no analytics tool ever would.',
+      'Reminder that "doing things that don\'t scale" still works in 2026. Our first 100 customers were onboarded manually by me via video call. It\'s slow, exhausting, and gave us insights no analytics tool ever would.',
     likes: 276,
     comments: 44,
     timeAgo: '2d ago',
   },
 ];
+
+export default posts;
