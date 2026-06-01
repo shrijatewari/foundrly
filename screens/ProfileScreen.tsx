@@ -53,10 +53,15 @@ export default function ProfileScreen() {
         {
           text: 'Log Out',
           style: 'destructive',
-          onPress: () =>
-            navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+          onPress: () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            });
+          },
         },
-      ]
+      ],
+      { cancelable: true }
     );
   };
 
@@ -409,6 +414,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 24,
     marginBottom: 32,
+    zIndex: 10,
   },
   logoutInner: {
     backgroundColor: 'transparent',
