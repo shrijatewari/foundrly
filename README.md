@@ -18,6 +18,7 @@ A mobile app built for early-stage founders to track startup health, connect wit
 | Icons | `@expo/vector-icons` (Ionicons) |
 | Fonts | Space Grotesk (UI) + Space Mono (metrics) via `@expo-google-fonts/*` |
 | Gradients | `expo-linear-gradient` |
+| Vector graphics | `react-native-svg` (animated circular progress, radar rings) |
 
 ---
 
@@ -36,7 +37,13 @@ foundrly/
 │
 ├── components/
 │   ├── FoundrlyDock.tsx      # Floating bottom-nav dock (animated, used as a custom tab bar)
-│   └── AnimatedTagline.tsx   # "Build. Learn. Launch." animated gradient tagline (splash)
+│   ├── AnimatedTagline.tsx   # "Build. Learn. Launch." animated gradient tagline (splash)
+│   ├── RadarEffect.tsx       # Animated radar (sweep + pulsing core + metric tiles) — AI idle state
+│   ├── ProgressBar.tsx       # Reusable linear progress bar (gradient + status variants, animated fill)
+│   ├── CircularProgress.tsx  # Reusable SVG ring progress (react-native-svg, animated stroke)
+│   ├── SegmentedProgress.tsx # Animated segmented progress bar (count-up + gradient segments)
+│   ├── StartupHealthCard.tsx # Dashboard startup-health card built on SegmentedProgress
+│   └── ChatComponent.tsx     # Reusable animated chat UI primitive
 │
 ├── types/
 │   └── index.ts              # Shared TypeScript interfaces (Post, FounderProfile, Task, StartupHealth, AIMessage)
@@ -48,7 +55,8 @@ foundrly/
 │
 ├── store/
 │   ├── useDashboardStore.ts  # Zustand store — daily tasks with AsyncStorage persistence
-│   └── useAIStore.ts         # Zustand store — chat messages with AsyncStorage persistence
+│   ├── useAIStore.ts         # Zustand store — chat messages with AsyncStorage persistence
+│   └── useNotificationStore.ts # Zustand store — notifications (today/earlier) + unread count
 │
 ├── navigation/
 │   ├── RootNavigator.tsx     # Stack navigator wrapping auth screens + main tabs
@@ -58,10 +66,13 @@ foundrly/
 ├── screens/
 │   ├── SplashScreen.tsx      # Animated splash: wordmark + gradient tagline, fades into Login after 2.5s
 │   ├── LoginScreen.tsx       # Themed login: mount/shake animations, gradient button, inline validation
-│   ├── DashboardScreen.tsx   # Startup health, AI suggestions, tasks, upcoming event
+│   ├── DashboardScreen.tsx   # Startup health, AI suggestions, live task-completion bar, upcoming event
 │   ├── CommunityScreen.tsx   # Feed of founder posts
-│   ├── AIScreen.tsx          # AI co-founder chat
-│   └── ProfileScreen.tsx     # Founder profile view
+│   ├── AIScreen.tsx          # AI co-founder chat (radar idle state → chat once a message is sent)
+│   ├── ProfileScreen.tsx     # Founder profile view (links to UI Components showcase)
+│   ├── NotificationsScreen.tsx   # Notification center: typed, color-coded, mark-as-read
+│   ├── StartupHealthScreen.tsx   # Startup-health analytics with animated circular-progress metrics
+│   └── ProgressShowcaseScreen.tsx # Gallery of the reusable progress components
 │
 └── assets/                   # App icon and splash image
 ```
@@ -118,6 +129,13 @@ metrics, loaded via `useFonts` in `App.tsx`.
 - **FoundrlyDock** — a floating, fit-content bottom-nav dock wired into React Navigation as a
   custom `tabBar`. Active tab shows an accent icon + dot indicator; inactive tabs lift and reveal
   a tooltip on hover/press. Screens add bottom padding so content clears the dock.
+- **AI radar idle state** — when the chat is empty, the AI screen shows an animated `RadarEffect`:
+  staggered concentric crimson rings, a 10s rotating gradient sweep beam, a pulsing core dot, and
+  seven startup-metric tiles (Burn Rate, Co-Founders, PMF Score, …). It hides on the first message.
+- **Progress components** — `ProgressBar` (linear, gradient + status variants), `SegmentedProgress`
+  (count-up with gradient segments, powering the dashboard Startup Health card), and
+  `CircularProgress` (animated `react-native-svg` ring). The dashboard daily-tasks bar updates live
+  as tasks are checked off; `ProgressShowcaseScreen` (linked from Profile) demos all variants.
 
 ---
 
