@@ -41,6 +41,12 @@ function PostCard({ post, avatarColor, onLike }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
 
+  const initials = (
+    post.founderName?.split(' ').map((n) => n[0]).join('').slice(0, 2) ||
+    post.startupName?.slice(0, 2) ||
+    'FO'
+  ).toUpperCase();
+
   const handleLike = () => {
     setIsLiked((prev) => {
       setLikeCount((c) => c + (prev ? -1 : 1));
@@ -54,9 +60,7 @@ function PostCard({ post, avatarColor, onLike }: PostCardProps) {
       {/* Header row: avatar + name + timeAgo */}
       <View style={styles.cardHeader}>
         <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-          <Text style={styles.avatarText}>
-            {post.startupName.slice(0, 2).toUpperCase()}
-          </Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
 
         <View style={styles.nameBlock}>
@@ -92,6 +96,20 @@ function PostCard({ post, avatarColor, onLike }: PostCardProps) {
           <Text style={styles.actionCount}>{post.comments}</Text>
         </View>
       </View>
+    </View>
+  );
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <View style={styles.emptyState}>
+      <Ionicons name="newspaper-outline" size={48} color="#333333" style={styles.emptyIcon} />
+      <Text style={styles.emptyTitle}>No posts yet</Text>
+      <Text style={styles.emptySub}>
+        Be the first to share something with the community
+      </Text>
     </View>
   );
 }
@@ -132,17 +150,13 @@ export default function CommunityScreen() {
     <SafeAreaView style={styles.root} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Community</Text>
-          <Text style={styles.headerSub}>Connect with fellow founders</Text>
-        </View>
-
         <TouchableOpacity
           onPress={() => setIsModalOpen(true)}
           activeOpacity={0.8}
         >
-          <View style={styles.addBtn}>
-            <Ionicons name="add" size={22} color="#FF3B5C" />
+          <View style={styles.postBtn}>
+            <Ionicons name="add" size={18} color="#FFFFFF" />
+            <Text style={styles.postBtnText}>Post</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -155,6 +169,7 @@ export default function CommunityScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={<EmptyState />}
       />
 
       {/* Create Post Modal */}
@@ -218,11 +233,11 @@ export default function CommunityScreen() {
               >
                 <View
                   style={[
-                    styles.postBtn,
+                    styles.submitBtn,
                     { backgroundColor: newPostText.trim() ? '#FF3B5C' : '#333333' },
                   ]}
                 >
-                  <Text style={styles.postBtnText}>Post</Text>
+                  <Text style={styles.submitBtnText}>Post</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -246,33 +261,27 @@ const styles = StyleSheet.create({
 
   // ── Header ──────────────────────────────────────────────────────────────────
   header: {
-    backgroundColor: '#0B0B0F',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  headerSub: {
-    fontSize: 13,
-    color: '#666666',
-    marginTop: 2,
-  },
-  addBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,59,92,0.15)',
-    justifyContent: 'center',
+  postBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FF3B5C',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  postBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 
   // ── List ────────────────────────────────────────────────────────────────────
@@ -280,6 +289,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 32,
+  },
+
+  // ── Empty state ──────────────────────────────────────────────────────────────
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 80,
+  },
+  emptyIcon: {
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#444444',
+    marginBottom: 8,
+  },
+  emptySub: {
+    fontSize: 14,
+    color: '#333333',
+    textAlign: 'center',
+    paddingHorizontal: 32,
   },
 
   // ── Post card ────────────────────────────────────────────────────────────────
@@ -430,12 +462,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
   },
-  postBtn: {
+  submitBtn: {
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  postBtnText: {
+  submitBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
