@@ -28,11 +28,11 @@ const TEXT_DIM = '#525252';
 
 // ── Chip definitions ─────────────────────────────────────────────────────────
 const CHIPS: { icon: React.ComponentProps<typeof Ionicons>['name']; label: string }[] = [
-  { icon: 'image-outline', label: 'Clone a Screenshot' },
-  { icon: 'git-branch-outline', label: 'Find co-founders' },
-  { icon: 'cloud-upload-outline', label: 'Pitch tips' },
-  { icon: 'desktop-outline', label: 'Raise funding' },
-  { icon: 'person-circle-outline', label: 'Build faster' },
+  { icon: 'bulb-outline',      label: 'Validate my idea' },
+  { icon: 'cash-outline',      label: 'How to raise funding' },
+  { icon: 'people-outline',    label: 'Find a co-founder' },
+  { icon: 'megaphone-outline', label: 'How to pitch investors' },
+  { icon: 'rocket-outline',    label: 'Launch faster' },
 ];
 
 // ── Send button (defined outside to prevent remount) ─────────────────────────
