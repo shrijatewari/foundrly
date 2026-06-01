@@ -16,11 +16,14 @@ interface AIStore {
   messages: AIMessage[];
   isTyping: boolean;
   sendMessage: (content: string) => void;
+  clearMessages: () => void;
 }
 
 export const useAIStore = create<AIStore>((set, get) => ({
   messages: [],
   isTyping: false,
+
+  clearMessages: () => set({ messages: [], isTyping: false }),
 
   sendMessage: (content: string) => {
     const userMessage: AIMessage = {

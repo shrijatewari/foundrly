@@ -62,7 +62,7 @@ function SendButton({
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 export default function AIScreen() {
-  const { messages, isTyping, sendMessage } = useAIStore();
+  const { messages, isTyping, sendMessage, clearMessages } = useAIStore();
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<AIMessage>>(null);
 
@@ -178,6 +178,14 @@ export default function AIScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      {/* Chat header with reset button */}
+      <View style={styles.chatHeader}>
+        <Text style={styles.chatHeaderTitle}>AI Co-Founder</Text>
+        <TouchableOpacity onPress={clearMessages} activeOpacity={0.7}>
+          <Ionicons name="refresh-outline" size={20} color="#666666" />
+        </TouchableOpacity>
+      </View>
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -336,6 +344,22 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 12,
     color: TEXT_MUTED,
+  },
+
+  // ── Chat header ───────────────────────────────────────────────────────────────
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.07)',
+  },
+  chatHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
   },
 
   // ── Chat state ────────────────────────────────────────────────────────────────
