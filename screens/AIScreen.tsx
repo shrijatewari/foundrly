@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: TEXT_PRIMARY,
     textAlign: 'center',
+    alignSelf: 'stretch',
     marginBottom: 32,
   },
 
@@ -313,7 +314,8 @@ const styles = StyleSheet.create({
   // Chips
   chipsScroll: {
     marginTop: 16,
-    alignSelf: 'stretch',
+    width: '100%',
+    height: 36,
   },
   chipsContent: {
     paddingRight: 4,
