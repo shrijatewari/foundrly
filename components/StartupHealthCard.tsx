@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -16,7 +17,7 @@ export default function StartupHealthCard({
 }: StartupHealthCardProps) {
   return (
     <View style={styles.card}>
-      {/* Top row: name + stage pill */}
+      {/* Top row: name + stage pill + chevron */}
       <View style={styles.topRow}>
         <Text style={styles.name} numberOfLines={1}>
           {startupName}
@@ -24,6 +25,7 @@ export default function StartupHealthCard({
         <View style={styles.pill}>
           <Text style={styles.pillText}>{stage}</Text>
         </View>
+        <Ionicons name="chevron-forward" size={16} color="#444444" style={styles.chevron} />
       </View>
 
       {/* Segmented completion bar */}
@@ -49,15 +51,17 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 18,
+  },
+  chevron: {
+    marginLeft: 8,
   },
   name: {
     fontFamily: fonts.grotesk.semibold,
     fontSize: 18,
     color: colors.text,
-    flexShrink: 1,
-    marginRight: 12,
+    flex: 1,
+    marginRight: 8,
   } as TextStyle,
   pill: {
     backgroundColor: 'rgba(255,59,92,0.1)',

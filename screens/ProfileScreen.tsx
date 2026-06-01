@@ -1,9 +1,6 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
@@ -11,7 +8,6 @@ const PROFILE = {
   name: 'Alex Rivera',
   role: 'Full Stack Founder',
   school: 'IIT Delhi — Class of 2026',
-  startupCount: 2,
   skills: ['React Native', 'UI/UX', 'Growth', 'Pitching'],
   achievements: [
     'Winner — National Startup Pitch 2025',
@@ -20,6 +16,17 @@ const PROFILE = {
   ],
 };
 
+const STATS = [
+  { value: '2',   label: 'Startups' },
+  { value: '847', label: 'Network'  },
+  { value: '12',  label: 'Mentors'  },
+];
+
+const MY_STARTUPS = [
+  { name: 'EcoTech', stage: 'MVP Development' },
+  { name: 'GreenAI', stage: 'Idea Stage'      },
+];
+
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
@@ -27,9 +34,6 @@ function getInitials(name: string): string {
 }
 
 export default function ProfileScreen() {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   return (
     <ScrollView
       style={styles.container}
@@ -42,6 +46,17 @@ export default function ProfileScreen() {
         end={{ x: 0.5, y: 1 }}
         style={styles.header}
       >
+        {/* Edit button */}
+        <TouchableOpacity
+          style={styles.editBtn}
+          activeOpacity={0.7}
+          onPress={() => Alert.alert('Edit profile coming soon!')}
+        >
+          <View style={styles.editBtnInner}>
+            <Text style={styles.editBtnText}>Edit</Text>
+          </View>
+        </TouchableOpacity>
+
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{getInitials(PROFILE.name)}</Text>
         </View>
@@ -49,11 +64,14 @@ export default function ProfileScreen() {
         <Text style={styles.role}>{PROFILE.role}</Text>
         <Text style={styles.school}>{PROFILE.school}</Text>
 
-        <View style={styles.startupBadge}>
-          <Ionicons name="rocket" size={14} color={colors.text} />
-          <Text style={styles.startupBadgeText}>
-            {PROFILE.startupCount} {PROFILE.startupCount === 1 ? 'Startup' : 'Startups'}
-          </Text>
+        {/* Stats row */}
+        <View style={styles.statsRow}>
+          {STATS.map((stat) => (
+            <View key={stat.label} style={styles.statItem}>
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
         </View>
       </LinearGradient>
 
@@ -81,19 +99,19 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>More</Text>
-        <Pressable
-          style={({ pressed }) => [styles.linkRow, pressed && styles.linkRowPressed]}
-          onPress={() => navigation.navigate('StartupHealth')}
-        >
-          <View style={styles.linkLeft}>
-            <View style={styles.linkIcon}>
-              <Ionicons name="stats-chart" size={16} color={colors.accent} />
+        <Text style={styles.sectionTitle}>My Startups</Text>
+        {MY_STARTUPS.map((startup) => (
+          <View key={startup.name} style={styles.startupCard}>
+            <View style={styles.startupIcon}>
+              <Ionicons name="rocket-outline" size={20} color="#FF3B5C" />
             </View>
-            <Text style={styles.linkText}>View Startup Health</Text>
+            <View style={styles.startupInfo}>
+              <Text style={styles.startupName}>{startup.name}</Text>
+              <Text style={styles.startupStage}>{startup.stage}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color="#333333" />
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </Pressable>
+        ))}
       </View>
     </ScrollView>
   );
@@ -112,6 +130,22 @@ const styles = StyleSheet.create({
     paddingTop: 64,
     paddingBottom: 32,
     paddingHorizontal: 24,
+  },
+  editBtn: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+  },
+  editBtnInner: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  editBtnText: {
+    fontSize: 13,
+    color: '#FFFFFF',
   },
   avatar: {
     width: 88,
@@ -144,23 +178,24 @@ const styles = StyleSheet.create({
     opacity: 0.65,
     marginTop: 4,
   },
-  startupBadge: {
+  statsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.primary,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    justifyContent: 'center',
+    gap: 24,
     marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
   },
-  startupBadgeText: {
-    ...typography.caption,
-    color: colors.text,
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
     fontWeight: '700',
-    fontSize: 13,
+    color: '#FFFFFF',
+  },
+  statLabel: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 2,
   },
   section: {
     paddingHorizontal: 24,
@@ -213,35 +248,36 @@ const styles = StyleSheet.create({
     color: colors.text,
     flexShrink: 1,
   },
-  linkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
+  startupCard: {
+    backgroundColor: '#111114',
+    borderRadius: 14,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.06)',
     padding: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  linkRowPressed: {
-    borderColor: 'rgba(255,59,92,0.25)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-  },
-  linkLeft: {
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  linkIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,59,92,0.12)',
-    alignItems: 'center',
+  startupIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(110,15,26,0.3)',
     justifyContent: 'center',
-    marginRight: 12,
+    alignItems: 'center',
   },
-  linkText: {
-    ...typography.body,
-    color: colors.text,
+  startupInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  startupName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  startupStage: {
+    fontSize: 12,
+    color: '#666666',
+    marginTop: 2,
   },
 });

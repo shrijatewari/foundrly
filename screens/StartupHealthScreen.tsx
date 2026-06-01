@@ -1,11 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CircularProgress from '../components/CircularProgress';
-import ProgressBar from '../components/ProgressBar';
-import type { ProgressVariant } from '../components/ProgressBar';
 import type { RootStackParamList } from '../navigation/types';
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -13,15 +21,14 @@ import type { RootStackParamList } from '../navigation/types';
 interface Metric {
   label: string;
   value: number;
-  variant: ProgressVariant;
 }
 
 const METRICS: Metric[] = [
-  { label: 'Product Development', value: 85, variant: 'success' },
-  { label: 'Marketing Reach',     value: 60, variant: 'default' },
-  { label: 'Funding Progress',    value: 40, variant: 'error'   },
-  { label: 'Team Strength',       value: 55, variant: 'warning' },
-  { label: 'User Traction',       value: 70, variant: 'success' },
+  { label: 'Product Development', value: 85 },
+  { label: 'Marketing Reach',     value: 60 },
+  { label: 'Funding Progress',    value: 40 },
+  { label: 'Team Strength',       value: 55 },
+  { label: 'User Traction',       value: 70 },
 ];
 
 const INSIGHTS = [
@@ -35,6 +42,73 @@ function metricColor(value: number): string {
   if (value >= 70) return '#4CAF50';
   if (value >= 50) return '#FF9800';
   return '#FF3B5C';
+}
+
+// ── Animated metric bar ───────────────────────────────────────────────────────
+
+function MetricBar({ metric }: { metric: Metric }) {
+  const anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: metric.value,
+      duration: 1000,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+  }, []);
+
+  const widthInterpolated = anim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
+  const fillColor = metricColor(metric.value);
+
+  return (
+    <View style={styles.metricCard}>
+      <View style={styles.metricRow}>
+        <Text style={styles.metricName}>{metric.label}</Text>
+        <Text style={[styles.metricValue, { color: fillColor }]}>
+          {metric.value}%
+        </Text>
+      </View>
+      <View style={styles.barTrack}>
+        <Animated.View
+          style={[
+            styles.barFill,
+            { width: widthInterpolated, backgroundColor: fillColor },
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
+// ── Insight card ──────────────────────────────────────────────────────────────
+
+function InsightCard({ text }: { text: string }) {
+  const [hovered, setHovered] = useState(false);
+
+  const hoverProps =
+    Platform.OS === 'web'
+      ? {
+          onMouseEnter: () => setHovered(true),
+          onMouseLeave: () => setHovered(false),
+        }
+      : {};
+
+  const cardStyle = [
+    styles.insightCard,
+    hovered && styles.insightCardHovered,
+    Platform.OS === 'web' ? ({ transition: 'all 0.3s ease' } as any) : null,
+  ];
+
+  return (
+    <View {...hoverProps} style={cardStyle}>
+      <Text style={styles.insightText}>{text}</Text>
+    </View>
+  );
 }
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -68,19 +142,7 @@ export default function StartupHealthScreen() {
         <Text style={styles.sectionTitle}>Key Metrics</Text>
 
         {METRICS.map((metric) => (
-          <View key={metric.label} style={styles.metricCard}>
-            <View style={styles.metricRow}>
-              <Text style={styles.metricName}>{metric.label}</Text>
-              <Text style={[styles.metricValue, { color: metricColor(metric.value) }]}>
-                {metric.value}%
-              </Text>
-            </View>
-            <ProgressBar
-              progress={metric.value}
-              variant={metric.variant}
-              size="sm"
-            />
-          </View>
+          <MetricBar key={metric.label} metric={metric} />
         ))}
 
         {/* AI Insights */}
@@ -89,9 +151,7 @@ export default function StartupHealthScreen() {
         </Text>
 
         {INSIGHTS.map((text, index) => (
-          <View key={index} style={styles.insightCard}>
-            <Text style={styles.insightText}>{text}</Text>
-          </View>
+          <InsightCard key={index} text={text} />
         ))}
 
         {/* Last updated */}
@@ -186,6 +246,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  barTrack: {
+    height: 6,
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: 6,
+    borderRadius: 3,
+  },
 
   // Insight cards
   insightCard: {
@@ -196,6 +267,13 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 10,
+  },
+  insightCardHovered: {
+    borderColor: 'rgba(255,59,92,0.5)',
+    shadowColor: '#FF3B5C',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
   },
   insightText: {
     fontSize: 13,
