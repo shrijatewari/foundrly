@@ -4,6 +4,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,17 +17,32 @@ import { AIMessage } from '../types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
+const INPUT_BG = '#1C1C24';
+const BORDER = 'rgba(255,255,255,0.10)';
+const PLACEHOLDER = 'rgba(255,255,255,0.30)';
+const ICON_COLOR = 'rgba(255,255,255,0.35)';
+
+const CHIPS = [
+  'Validate my idea',
+  'Find co-founders',
+  'Pitch tips',
+  'Raise funding',
+  'Build faster',
+];
+
 export default function AIScreen() {
   const { messages, isTyping, sendMessage } = useAIStore();
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<AIMessage>>(null);
+
+  const inChatMode = messages.length > 0;
   const hasText = input.trim().length > 0;
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+    if (inChatMode) {
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
     }
-  }, [messages, isTyping]);
+  }, [messages, isTyping, inChatMode]);
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -35,14 +51,90 @@ export default function AIScreen() {
     sendMessage(trimmed);
   };
 
-  const renderMessage = ({ item, index }: { item: AIMessage; index: number }) => {
+  // ─── Shared sub-components ────────────────────────────────────────────────
+
+  const SendButton = ({ compact }: { compact?: boolean }) => (
+    <TouchableOpacity
+      onPress={handleSend}
+      disabled={!hasText}
+      activeOpacity={0.75}
+      style={[
+        styles.sendBtn,
+        compact && styles.sendBtnCompact,
+        hasText ? styles.sendBtnActive : styles.sendBtnIdle,
+      ]}
+    >
+      <Ionicons
+        name="arrow-up"
+        size={compact ? 16 : 18}
+        color={hasText ? '#000000' : ICON_COLOR}
+      />
+    </TouchableOpacity>
+  );
+
+  // ─── Render: Initial state ────────────────────────────────────────────────
+
+  if (!inChatMode) {
+    return (
+      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.initialWrapper}>
+            <Text style={styles.heading}>What can I help{'\n'}you build?</Text>
+
+            {/* Main input card */}
+            <View style={styles.inputCard}>
+              <TextInput
+                style={styles.inputCardText}
+                value={input}
+                onChangeText={setInput}
+                placeholder="Ask your AI co-founder..."
+                placeholderTextColor={PLACEHOLDER}
+                multiline
+                maxLength={500}
+              />
+              <View style={styles.inputCardRow}>
+                <TouchableOpacity activeOpacity={0.6}>
+                  <Ionicons name="attach-outline" size={22} color={ICON_COLOR} />
+                </TouchableOpacity>
+                <SendButton />
+              </View>
+            </View>
+
+            {/* Suggestion chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsContent}
+              style={styles.chipsScroll}
+            >
+              {CHIPS.map((chip) => (
+                <TouchableOpacity
+                  key={chip}
+                  style={styles.chip}
+                  onPress={() => setInput(chip)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.chipText}>{chip}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── Render: Chat state ───────────────────────────────────────────────────
+
+  const renderMessage = ({ item }: { item: AIMessage }) => {
     const isUser = item.role === 'user';
-    const prevItem = index > 0 ? messages[index - 1] : null;
-    const isFirstInGroup = !prevItem || prevItem.role !== item.role;
 
     if (isUser) {
       return (
-        <View style={[styles.rowUser, !isFirstInGroup && styles.rowGrouped]}>
+        <View style={styles.rowUser}>
           <View style={styles.bubbleUser}>
             <Text style={styles.bubbleTextUser}>{item.content}</Text>
           </View>
@@ -51,46 +143,23 @@ export default function AIScreen() {
     }
 
     return (
-      <View style={[styles.rowAI, !isFirstInGroup && styles.rowGrouped]}>
-        {isFirstInGroup && <Text style={styles.aiLabel}>AI</Text>}
-        <View style={[styles.bubbleAI, !isFirstInGroup && styles.bubbleAIGrouped]}>
+      <View style={styles.rowAI}>
+        <Text style={styles.aiLabel}>AI ✦</Text>
+        <View style={styles.bubbleAI}>
           <Text style={styles.bubbleTextAI}>{item.content}</Text>
         </View>
       </View>
     );
   };
 
-  const TypingIndicator = () => (
-    <View style={styles.rowAI}>
-      <Text style={styles.aiLabel}>AI</Text>
-      <View style={styles.bubbleAI}>
-        <View style={styles.typingDotsRow}>
-          <View style={[styles.dot, styles.dot1]} />
-          <View style={[styles.dot, styles.dot2]} />
-          <View style={[styles.dot, styles.dot3]} />
-        </View>
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerDot} />
-          <View>
-            <Text style={styles.headerTitle}>AI Co-Founder</Text>
-            <Text style={styles.headerStatus}>Online · Ready to help</Text>
-          </View>
-        </View>
-      </View>
-
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
+        {/* Message list */}
         <FlatList
           ref={listRef}
           data={messages}
@@ -98,55 +167,41 @@ export default function AIScreen() {
           renderItem={renderMessage}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          ListFooterComponent={isTyping ? <TypingIndicator /> : null}
+          ListFooterComponent={
+            isTyping ? (
+              <View style={styles.rowAI}>
+                <Text style={styles.aiLabel}>AI ✦</Text>
+                <View style={styles.bubbleAI}>
+                  <View style={styles.typingRow}>
+                    <View style={[styles.dot, { opacity: 1 }]} />
+                    <View style={[styles.dot, { opacity: 0.6 }]} />
+                    <View style={[styles.dot, { opacity: 0.3 }]} />
+                  </View>
+                </View>
+              </View>
+            ) : null
+          }
         />
 
-        {/* Input area */}
-        <View style={styles.inputArea}>
-          <View style={styles.inputContainer}>
-            {/* Attach button */}
-            <TouchableOpacity style={styles.attachButton} activeOpacity={0.6}>
-              <Ionicons
-                name="attach"
-                size={22}
-                color={`${colors.text}50`}
-                style={styles.attachIcon}
-              />
-            </TouchableOpacity>
-
-            {/* Text field */}
+        {/* Compact bottom input bar */}
+        <View style={styles.chatInputArea}>
+          <View style={styles.chatInputBar}>
             <TextInput
-              style={styles.textInput}
+              style={styles.chatInputText}
               value={input}
               onChangeText={setInput}
-              placeholder="Message your co-founder..."
-              placeholderTextColor={`${colors.text}30`}
+              placeholder="Ask your AI co-founder..."
+              placeholderTextColor={PLACEHOLDER}
               multiline
               maxLength={500}
-              returnKeyType="default"
             />
-
-            {/* Send button */}
-            <TouchableOpacity
-              style={[styles.sendButton, hasText && styles.sendButtonActive]}
-              onPress={handleSend}
-              disabled={!hasText}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="arrow-up"
-                size={18}
-                color={hasText ? colors.text : `${colors.text}40`}
-              />
-            </TouchableOpacity>
+            <SendButton compact />
           </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const DOT_SIZE = 7;
 
 const styles = StyleSheet.create({
   root: {
@@ -157,174 +212,183 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // ── Header ──────────────────────────────────────────────────────────────────
-  header: {
+  // ── Initial state ──────────────────────────────────────────────────────────
+  initialWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  heading: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: colors.text,
+    lineHeight: 40,
+    marginBottom: 24,
+  },
+
+  // Input card
+  inputCard: {
+    backgroundColor: INPUT_BG,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 16,
+  },
+  inputCardText: {
+    ...typography.body,
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+    minHeight: 60,
+    maxHeight: 200,
+    backgroundColor: 'transparent',
+    textAlignVertical: 'top',
+    padding: 0,
+  },
+  inputCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
+    marginTop: 12,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerDot: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
+
+  // Send button (shared)
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerTitle: {
-    ...typography.body,
-    color: colors.text,
-    fontWeight: '600',
-    fontSize: 16,
+  sendBtnCompact: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
   },
-  headerStatus: {
-    ...typography.caption,
-    color: colors.accent,
-    fontSize: 12,
-    marginTop: 1,
+  sendBtnIdle: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  sendBtnActive: {
+    backgroundColor: colors.text,
   },
 
-  // ── Message list ─────────────────────────────────────────────────────────────
+  // Chips
+  chipsScroll: {
+    marginTop: 16,
+  },
+  chipsContent: {
+    gap: 8,
+    paddingRight: 4,
+  },
+  chip: {
+    backgroundColor: INPUT_BG,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  chipText: {
+    ...typography.caption,
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+
+  // ── Chat state ─────────────────────────────────────────────────────────────
   listContent: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 12,
   },
 
   rowUser: {
     alignItems: 'flex-end',
-    marginTop: 16,
+    marginBottom: 12,
   },
   rowAI: {
     alignItems: 'flex-start',
-    marginTop: 16,
-  },
-  rowGrouped: {
-    marginTop: 4,
+    marginBottom: 12,
   },
 
-  // AI label above bubble
-  aiLabel: {
-    ...typography.caption,
-    color: `${colors.text}45`,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.8,
-    marginBottom: 4,
-    marginLeft: 2,
-  },
-
-  // Bubbles
   bubbleUser: {
     backgroundColor: colors.accent,
-    borderRadius: 20,
-    borderBottomRightRadius: 5,
+    borderRadius: 18,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    paddingVertical: 11,
-    maxWidth: '78%',
-  },
-  bubbleAI: {
-    backgroundColor: colors.secondary,
-    borderRadius: 20,
-    borderBottomLeftRadius: 5,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    maxWidth: '78%',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  bubbleAIGrouped: {
-    borderTopLeftRadius: 20,
+    maxWidth: '80%',
   },
   bubbleTextUser: {
     ...typography.body,
     color: colors.text,
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 21,
+  },
+
+  aiLabel: {
+    ...typography.caption,
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    marginBottom: 4,
+    marginLeft: 2,
+  },
+  bubbleAI: {
+    backgroundColor: INPUT_BG,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    maxWidth: '80%',
   },
   bubbleTextAI: {
     ...typography.body,
-    color: `${colors.text}DD`,
+    color: colors.text,
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 21,
   },
 
-  // Typing indicator — three animated-style dots
-  typingDotsRow: {
+  // Typing dots
+  typingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingVertical: 2,
   },
   dot: {
-    width: DOT_SIZE,
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2,
-    backgroundColor: `${colors.text}50`,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: 'rgba(255,255,255,0.55)',
   },
-  dot1: {},
-  dot2: { opacity: 0.65 },
-  dot3: { opacity: 0.35 },
 
-  // ── Input ────────────────────────────────────────────────────────────────────
-  inputArea: {
+  // Compact chat input bar
+  chatInputArea: {
     paddingHorizontal: 14,
-    paddingTop: 10,
+    paddingTop: 8,
     paddingBottom: 110,
     backgroundColor: colors.background,
   },
-  inputContainer: {
+  chatInputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-    borderRadius: 26,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    gap: 4,
+    backgroundColor: INPUT_BG,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingLeft: 18,
+    paddingRight: 8,
+    gap: 8,
   },
-  attachButton: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 18,
-  },
-  attachIcon: {
-    transform: [{ rotate: '45deg' }],
-  },
-  textInput: {
+  chatInputText: {
     flex: 1,
     ...typography.body,
     color: colors.text,
     fontSize: 15,
     lineHeight: 21,
-    paddingTop: 7,
-    paddingBottom: 7,
-    paddingHorizontal: 4,
-    maxHeight: 130,
-    // Transparent — border lives on the container
+    maxHeight: 120,
     backgroundColor: 'transparent',
-  },
-  sendButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.07)',
-  },
-  sendButtonActive: {
-    backgroundColor: colors.accent,
+    paddingTop: 4,
+    paddingBottom: 4,
+    padding: 0,
   },
 });
