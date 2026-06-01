@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import RadarEffect from '../components/RadarEffect';
 import { useAIStore } from '../store/useAIStore';
 import { AIMessage } from '../types';
 
@@ -90,9 +91,19 @@ export default function AIScreen() {
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.initialCenter}>
-            {/* Heading */}
-            <Text style={styles.heading}>What can I help you build?</Text>
+          <ScrollView
+            contentContainerStyle={styles.initialCenter}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Idle radar state — AI "scanning" the startup */}
+            <View style={styles.emptyState}>
+              <Text style={styles.statusLabel}>AI Co-Founder Online</Text>
+              <RadarEffect />
+              <Text style={styles.emptySubtext}>
+                Ask me anything about your startup — runway, hiring, growth strategy.
+              </Text>
+            </View>
 
             {/* Input container */}
             <View style={styles.inputContainer}>
@@ -148,7 +159,7 @@ export default function AIScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
@@ -248,18 +259,31 @@ const styles = StyleSheet.create({
 
   // ── Initial state ────────────────────────────────────────────────────────────
   initialCenter: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
+    paddingVertical: 24,
   },
-  heading: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: TEXT_PRIMARY,
-    textAlign: 'center',
+  emptyState: {
+    alignItems: 'center',
     alignSelf: 'stretch',
-    marginBottom: 32,
+    marginBottom: 24,
+    gap: 12,
+  },
+  statusLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: TEXT_MUTED,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  emptySubtext: {
+    fontSize: 12,
+    color: '#444455',
+    textAlign: 'center',
+    maxWidth: 280,
+    lineHeight: 18,
   },
 
   // Input container
