@@ -1,7 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
+  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -10,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
@@ -37,6 +41,25 @@ function getInitials(name: string): string {
 }
 
 export default function ProfileScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () =>
+            navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+        },
+      ]
+    );
+  };
+
   const [profileName,   setProfileName]   = useState('Alex Rivera');
   const [profileRole,   setProfileRole]   = useState('Full Stack Founder');
   const [profileSchool, setProfileSchool] = useState('IIT Delhi — Class of 2026');
@@ -140,6 +163,18 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
+
+        {/* Logout button */}
+        <TouchableOpacity
+          onPress={handleLogout}
+          activeOpacity={0.7}
+          style={styles.logoutBtn}
+        >
+          <View style={styles.logoutInner}>
+            <Ionicons name="log-out-outline" size={18} color="#FF3B5C" />
+            <Text style={styles.logoutText}>Log Out</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Edit Profile Modal */}
@@ -367,6 +402,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666666',
     marginTop: 2,
+  },
+
+  // ── Logout ───────────────────────────────────────────────────────────────────
+  logoutBtn: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 32,
+  },
+  logoutInner: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255,59,92,0.3)',
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  logoutText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FF3B5C',
   },
 
   // ── Edit Modal ───────────────────────────────────────────────────────────────
