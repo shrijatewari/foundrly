@@ -18,6 +18,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
+  Showcase: undefined;
 };
 
 declare global {

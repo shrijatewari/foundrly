@@ -15,6 +15,7 @@ export const fonts = {
   },
   mono: {
     regular: 'SpaceMono_400Regular',
+    bold: 'SpaceMono_700Bold',
   },
 } as const;
 

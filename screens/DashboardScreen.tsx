@@ -10,10 +10,17 @@ import { startupHealth } from '../data/dashboard';
 import { useDashboardStore } from '../store/useDashboardStore';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
+import StartupHealthCard from '../components/StartupHealthCard';
+import ProgressBar from '../components/ProgressBar';
 
 export default function DashboardScreen() {
   const { tasks, toggleTask } = useDashboardStore();
-  const { name, stage, progress, aiSuggestions, upcomingEvent } = startupHealth;
+  const { aiSuggestions, upcomingEvent } = startupHealth;
+
+  const completedCount = tasks.filter((t) => t.completed).length;
+  const totalCount = tasks.length;
+  const taskPercent = totalCount ? (completedCount / totalCount) * 100 : 0;
+  const allDone = totalCount > 0 && completedCount === totalCount;
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -26,18 +33,11 @@ export default function DashboardScreen() {
         <Text style={styles.welcomeText}>Welcome, Founder 👋</Text>
 
         {/* Startup Health Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>STARTUP HEALTH</Text>
-          <Text style={styles.startupName}>{name}</Text>
-          <Text style={styles.stageBadgeText}>{stage}</Text>
-
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-          </View>
-          <View style={styles.progressRow}>
-            <Text style={styles.progressPercent}>{Math.round(progress * 100)}% complete</Text>
-          </View>
-        </View>
+        <StartupHealthCard
+          startupName="EcoTech"
+          stage="MVP Development"
+          progress={72}
+        />
 
         {/* AI Suggestions Card */}
         <View style={styles.card}>
@@ -53,6 +53,17 @@ export default function DashboardScreen() {
         {/* Daily Tasks Card */}
         <View style={styles.card}>
           <Text style={styles.cardLabel}>DAILY TASKS</Text>
+
+          <View style={styles.taskProgress}>
+            <ProgressBar
+              progress={taskPercent}
+              variant={allDone ? 'success' : 'default'}
+              size="sm"
+              label={`${completedCount} of ${totalCount} done`}
+              showPercent
+            />
+          </View>
+
           {tasks.map((task) => (
             <TouchableOpacity
               key={task.id}
@@ -131,40 +142,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Startup Health
-  startupName: {
-    ...typography.subheading,
-    color: colors.text,
-    marginBottom: 4,
-  },
-  stageBadgeText: {
-    ...typography.caption,
-    color: colors.text,
-    opacity: 0.6,
-    marginBottom: 16,
-  },
-  progressTrack: {
-    height: 8,
-    backgroundColor: colors.background,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.accent,
-    borderRadius: 4,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 6,
-  },
-  progressPercent: {
-    ...typography.caption,
-    color: colors.accent,
-    fontWeight: '600',
-  },
-
   // AI Suggestions
   suggestionRow: {
     flexDirection: 'row',
@@ -186,6 +163,9 @@ const styles = StyleSheet.create({
   },
 
   // Daily Tasks
+  taskProgress: {
+    marginBottom: 12,
+  },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',

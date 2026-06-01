@@ -9,7 +9,7 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from '@expo-google-fonts/space-grotesk';
-import { SpaceMono_400Regular } from '@expo-google-fonts/space-mono';
+import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import RootNavigator from './navigation/RootNavigator';
 import { colors } from './theme/colors';
 
@@ -34,6 +34,7 @@ export default function App() {
     SpaceGrotesk_600SemiBold,
     SpaceGrotesk_700Bold,
     SpaceMono_400Regular,
+    SpaceMono_700Bold,
   });
 
   if (!fontsLoaded) {

@@ -1,6 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
@@ -24,6 +27,9 @@ function getInitials(name: string): string {
 }
 
 export default function ProfileScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <ScrollView
       style={styles.container}
@@ -72,6 +78,22 @@ export default function ProfileScreen() {
             <Text style={styles.achievementText}>{achievement}</Text>
           </View>
         ))}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>More</Text>
+        <Pressable
+          style={({ pressed }) => [styles.linkRow, pressed && styles.linkRowPressed]}
+          onPress={() => navigation.navigate('Showcase')}
+        >
+          <View style={styles.linkLeft}>
+            <View style={styles.linkIcon}>
+              <Ionicons name="stats-chart" size={16} color={colors.accent} />
+            </View>
+            <Text style={styles.linkText}>UI Components</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -190,5 +212,36 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.text,
     flexShrink: 1,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  linkRowPressed: {
+    borderColor: 'rgba(255,59,92,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  linkLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  linkIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,59,92,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  linkText: {
+    ...typography.body,
+    color: colors.text,
   },
 });
